@@ -10,19 +10,6 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 
 
-// In-memory stores (placeholder until a real database is wired up)
-const users = [];
-const projects = [];
-
-const transporter = nodemailer.createTransport({
-  host: "smtp.example.com",
-  port: 587,
-  secure: false, // use STARTTLS (upgrade connection to TLS after connecting)
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
 
 const app = express();
 app.use(cors({
@@ -42,6 +29,9 @@ app.use("/auth", authRouter);
 
 import dashboardRouter from "./routes/dashboard.route.js";
 app.use("/dashboard", dashboardRouter);
+
+import sendMailRouter from "./routes/sendmail.route.js";
+app.use("/api", sendMailRouter);
 
 const PORT = process.env.PORT || 3000;
 

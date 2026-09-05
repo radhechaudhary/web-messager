@@ -19,6 +19,7 @@ const Dashboard = ({user}) => {
         const projects = response.data.projects;
         setProjects(projects);
       } catch (err) {
+        
         setError(err.message);
       } finally {
         setLoading(false);

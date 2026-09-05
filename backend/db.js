@@ -33,4 +33,9 @@ pool.query(`CREATE TABLE IF NOT EXISTS projects (
     message_count INT DEFAULT 0,
     user_email VARCHAR(255) REFERENCES users(email)
 );`)
+
+// pool.query(`ALTER TABLE projects
+// ADD COLUMN daily_limit INT DEFAULT 100,
+// ADD COLUMN daily_message_count INT DEFAULT 0,
+// ADD COLUMN last_reset DATE DEFAULT CURRENT_DATE;`)
 export default pool

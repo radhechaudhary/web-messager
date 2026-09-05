@@ -25,13 +25,16 @@ const createProject = async (req, res)=>{
         const { name, domain } = req.body;
         const email = req.user.email;
         console.log("Creating project for user:", email, "with name:", name, "and domain:", domain);
-        const apiKey = await jsonwebtoken.sign({ email, name, domain }, process.env.JWT_SECRET, { expiresIn: "1y" });
-        const data = await db.query(`INSERT INTO projects (name, domain, api_key, user_email) VALUES ($1, $2, $3, $4) returning *`, [name, domain, apiKey, email]);
+        const data = await db.query(`INSERT INTO projects (name, domain, api_key, user_email) VALUES ($1, $2, $3, $4) returning id`, [name, domain, 'abc', email]);
+        const id = data.rows[0].id;
+        const apiKey = await jsonwebtoken.sign({ id, email, name, domain }, process.env.JWT_SECRET, { expiresIn: "1y" });
+        const updatedProject = await db.query(`Update projects set api_key = $1 where id = $2 returning *`, [apiKey, id]);
         res.status(201).json({
             success: true,
-            project: data.rows[0]
+            project: updatedProject.rows[0]
         })
     } catch (error) {
+        console.error("Error creating project:", error);
         res.status(500).json({
             success: false,
             message: "An error occurred while creating the project."
