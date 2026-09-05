@@ -1,18 +1,20 @@
 import { NavLink, useNavigate } from "react-router-dom";
 // import { useAuth } from "../context/useAuth";
+import axios from "axios";
 
 const linkClass = ({ isActive }) =>
   `text-sm font-medium px-3 py-2 rounded-md transition-colors ${
     isActive ? "bg-indigo-50 text-indigo-600" : "text-slate-600 hover:text-slate-900"
   }`;
 
-const Navbar = () => {
+const Navbar = ({user}) => {
   // const { user, logout } = useAuth();
-  const user = { name: "John Doe" }; // Mock user for demonstration
+ // Mock user for demonstration
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    // logout();
+
+  const handleLogout = async () => {
+    await axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, { withCredentials: true })
     navigate("/login");
   };
 

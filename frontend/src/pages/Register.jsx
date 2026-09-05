@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const Register = () => {
+const Register = ({setUser}) => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+      axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/verify`, { withCredentials: true })
+      .then((response) => {
+        setUser(response.data.user);
+        navigate("/dashboard");
+      })
+      .catch((error) => {
+        console.error("Error fetching user:", error);
+        setUser(null);
+      });
+  },[]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -21,15 +34,19 @@ const Register = () => {
     }
 
     setLoading(true);
-      // try {
-      //   await registerUser(form);
-      //   navigate("/login");
-      // } catch (err) {
-      //   setError(err.message);
-      // } finally {
-      //   setLoading(false);
-      // }
-      navigate("/dashboard");
+      try {
+        await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/register`, {
+          email: form.email,
+          name: form.name,
+          password: form.password
+        }, { withCredentials: true });
+        setUser({ email: form.email, name: form.name });
+        navigate("/dashboard");
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
   };
 
   return (

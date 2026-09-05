@@ -1,11 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const Login = () => {
+const Login = ({setUser}) => {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+      axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/verify`, { withCredentials: true })
+      .then((response) => {
+        setUser(response.data.user);
+        navigate("/dashboard");
+      })
+      .catch((error) => {
+        console.error("Error fetching user:", error);
+        setUser(null);
+      });
+  },[]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -14,16 +27,19 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    // setLoading(true);
-    // try {
-    //   const { token, user } = await loginUser(form);
-    //   login(token, user);
+    setLoading(true);
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, {
+        email: form.email,
+        password: form.password
+      }, { withCredentials: true });
+      setUser({ email: form.email, name: response.data.name });
       navigate("/dashboard");
-    // } catch (err) {
-    //   setError(err.message);
-    // } finally {
-    //   setLoading(false);
-    // }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

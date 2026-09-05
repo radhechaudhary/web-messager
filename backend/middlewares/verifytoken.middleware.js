@@ -12,7 +12,7 @@ const verifyToken = (req, res, next) => {
                 message: "Unauthorized"
             })
         }
-        const decoded = jsonwebtoken.verify(token, process.env.SECRET_KEY);
+        const decoded = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
         next();
     } catch (error) {
@@ -23,4 +23,4 @@ const verifyToken = (req, res, next) => {
     }
 }
 
-export { verifyToken }
+export default verifyToken

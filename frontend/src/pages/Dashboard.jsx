@@ -1,18 +1,39 @@
 import { useEffect, useState } from "react";
+import axios from "axios";
 
-const Dashboard = () => {
+const Dashboard = ({user}) => {
   // const { token } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const [form, setForm] = useState({ name: "", domain: "" });
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setLoading(true);
+      try {
+        // const projects = await getProjects(token);
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/dashboard/projects`, { withCredentials: true });
+        const projects = response.data.projects;
+        setProjects(projects);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
+
+
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -20,9 +41,9 @@ const Dashboard = () => {
     setCreating(true);
     try {
       // const project = await createProject(form, token);
-      const project = { id: 1, name: form.name, domain: form.domain, apiKey: "api_key_123", messageCount: 0 };
-      setProjects((prev) => [...prev, project]);
+      const response = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/dashboard/addProject`, form, { withCredentials: true });
       setForm({ name: "", domain: "" });
+      setProjects((prev) => [...prev, response.data.project]);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -37,6 +58,7 @@ const Dashboard = () => {
     if (!window.confirm("Delete this project? This cannot be undone.")) return;
     try {
       setProjects((prev) => prev.filter((p) => p.id !== id));
+      await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/dashboard/deleteProject/${id}`, { withCredentials: true }); 
     } catch (err) {
       setError(err.message);
     }
@@ -125,7 +147,7 @@ const Dashboard = () => {
               </thead>
               <tbody>
                 {projects.map((project) => (
-                  <tr key={project.id} className="border-b border-slate-100 last:border-0">
+                  <tr key={project.apiKey} className="border-b border-slate-100 last:border-0">
                     <td className="px-6 py-3 font-medium text-slate-800">{project.name}</td>
                     <td className="px-6 py-3 text-slate-600">{project.domain}</td>
                     <td className="px-6 py-3">
@@ -134,14 +156,14 @@ const Dashboard = () => {
                           {project.apiKey}
                         </code>
                         <button
-                          onClick={() => handleCopy(project.id, project.apiKey)}
+                          onClick={() => handleCopy(project.id, project.api_key)}
                           className="text-xs text-indigo-600 hover:underline"
                         >
                           {copiedId === project.id ? "Copied!" : "Copy"}
                         </button>
                       </div>
                     </td>
-                    <td className="px-6 py-3 text-slate-600">{project.messageCount}</td>
+                    <td className="px-6 py-3 text-slate-600">{project.message_count}</td>
                     <td className="px-6 py-3 text-right">
                       <button
                         onClick={() => handleDelete(project.id)}

@@ -1,13 +1,14 @@
-import {router} from "express";
-import verifyToken from "../middleware/verifyToken.js";
+import {Router} from "express";
+import verifyToken from "../middlewares/verifytoken.middleware.js";
 import { getDashboard, createProject, deleteProject } from "../controllers/dashboard.controller.js";
 
-const router = router();
 
-router.get("/dashboard", verifyToken, getDashboard);
+const dashboardRouter = Router();
 
-router.post("/addProject", verifyToken, createProject);
+dashboardRouter.get("/projects", verifyToken, getDashboard);
 
-router.delete("/deleteProject", verifyToken, deleteProject);
+dashboardRouter.post("/addProject", verifyToken, createProject);
 
-export default router;
+dashboardRouter.delete("/deleteProject/:id", verifyToken, deleteProject);
+
+export default dashboardRouter;

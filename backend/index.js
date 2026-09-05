@@ -1,14 +1,14 @@
-import expreess from "express";
+import express from "express";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
-import cors from "cors";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
 
 // In-memory stores (placeholder until a real database is wired up)
 const users = [];
@@ -24,10 +24,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const app = expreess();
+const app = express();
+app.use(cors({
+  origin: "http://localhost:5173", // Replace with your frontend URL
+  credentials: true,
+}));
+app.use(express.json());
+app.use(cookieParser());
 
-app.use(cors());
-app.use(expreess.json());
+
 
 app.get("/", (req, res)=>{
     res.send("Email service is running");
