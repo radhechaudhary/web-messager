@@ -22,7 +22,11 @@ await transporter.verify().then(() => {
 const router = Router();
 
 router.post("/send-message", async (req, res) => {
-    const { from , subject, message, api } = req.body;
+    const { from , subject, message, api, name } = req.body;
+    if(!from || !message || !api ){
+        return res.status(400).json({ message: "Missing required fields" });
+    }
+
     try{
         const user = await jsonwebtoken.verify(api, process.env.JWT_SECRET);
         req.user = user;
@@ -57,9 +61,7 @@ router.post("/send-message", async (req, res) => {
         await db.query(`UPDATE projects SET message_count = message_count + 1, daily_message_count = daily_message_count + 1 WHERE id = $1`, [id]);
         const to = req.user.email; // Send email to the user's registered email
         // You can customize the email content here
-        const text = `From: ${from}\n\n${message}`; 
-        // Send email logic here
-        // For example, using nodemailer
+        const text = `From: ${from}\n\nname: ${name || "Anonymous"}\n\n${message}`; 
         await transporter.sendMail({
             from: process.env.SMTP_USER,
             to,

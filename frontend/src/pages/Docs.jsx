@@ -6,12 +6,15 @@ const CodeBlock = ({ children }) => (
   </pre>
 );
 
-const Field = ({ name, type, children }) => (
+const Field = ({ name, type, optional, children }) => (
   <tr className="border-b border-slate-100 last:border-0 align-top">
     <td className="py-2 pr-4">
       <code className="text-xs bg-slate-100 rounded px-1.5 py-0.5 text-slate-800">{name}</code>
     </td>
-    <td className="py-2 pr-4 text-slate-500 text-xs whitespace-nowrap">{type}</td>
+    <td className="py-2 pr-4 text-xs whitespace-nowrap">
+      <span className="text-slate-500">{type}</span>
+      {optional && <span className="block text-slate-400">optional</span>}
+    </td>
     <td className="py-2 text-slate-600">{children}</td>
   </tr>
 );
@@ -79,14 +82,20 @@ const Docs = () => (
             Your project's API key, copied from the Dashboard.
           </Field>
           <Field name="from" type="string">
-            Who the message is from — typically the email address or name your visitor entered in
-            your form. It is shown at the top of the email body.
-          </Field>
-          <Field name="subject" type="string">
-            Subject line of the email you receive.
+            Who the message is from — typically the email address your visitor entered in your
+            form. It is shown at the top of the email body.
           </Field>
           <Field name="message" type="string">
             The message body.
+          </Field>
+          <Field name="name" type="string" optional>
+            The sender's name, shown in the email body below{" "}
+            <code className="bg-slate-100 rounded px-1 py-0.5">from</code>. Falls back to{" "}
+            <span className="font-medium">Anonymous</span> when omitted.
+          </Field>
+          <Field name="subject" type="string" optional>
+            Subject line of the email you receive. Omitting it sends the email with an empty
+            subject.
           </Field>
         </tbody>
       </table>
@@ -97,8 +106,9 @@ const Docs = () => (
   -d '{
     "api": "YOUR_API_KEY",
     "from": "visitor@example.com",
-    "subject": "New contact form submission",
-    "message": "Hi, I would like to know more about your pricing."
+    "message": "Hi, I would like to know more about your pricing.",
+    "name": "Jane Doe",
+    "subject": "New contact form submission"
   }'`}</CodeBlock>
 
       <p className="text-sm font-medium text-slate-700 mt-4">JavaScript (fetch)</p>
@@ -108,8 +118,9 @@ const Docs = () => (
   body: JSON.stringify({
     api: import.meta.env.VITE_MESSAGE_API_KEY,
     from: form.email,
-    subject: "New contact form submission",
     message: form.message,
+    name: form.name, // optional
+    subject: "New contact form submission", // optional
   }),
 });`}</CodeBlock>
 
@@ -151,6 +162,14 @@ const Docs = () => (
       <h2 className="text-lg font-semibold text-slate-800">Errors</h2>
       <table className="w-full text-sm">
         <tbody>
+          <Field name="400" type="Missing required fields">
+            One of <code className="bg-slate-100 rounded px-1 py-0.5">api</code>,{" "}
+            <code className="bg-slate-100 rounded px-1 py-0.5">from</code> or{" "}
+            <code className="bg-slate-100 rounded px-1 py-0.5">message</code> is missing from the
+            body. <code className="bg-slate-100 rounded px-1 py-0.5">name</code> and{" "}
+            <code className="bg-slate-100 rounded px-1 py-0.5">subject</code> are optional and
+            never cause this.
+          </Field>
           <Field name="401" type="Invalid Api Key">
             The <code className="bg-slate-100 rounded px-1 py-0.5">api</code> field is missing,
             malformed, or the key has expired.
