@@ -3,7 +3,7 @@ import axios from "axios";
 import {useNavigate} from "react-router-dom";
 import AnalyticsPanel from "../components/AnalyticsPanel";
 
-const Dashboard = ({user}) => {
+const Dashboard = ({user, setUser}) => {
   // const { token } = useAuth();
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
@@ -25,6 +25,7 @@ const Dashboard = ({user}) => {
         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/dashboard/projects`, { withCredentials: true });
         const projects = response.data.projects;
         setProjects(projects);
+        setUser(response.data.user);
       } catch (err) {
         navigate("/login", { replace: true });
         setError(err.message);

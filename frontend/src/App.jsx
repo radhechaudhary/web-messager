@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom"
 import Landing from "./pages/Landing"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import VerifyOtp from "./pages/VerifyOtp"
 import Dashboard from "./pages/Dashboard"
 import Docs from "./pages/Docs"
 import ProtectedRoute from "./components/ProtectedRoute"
@@ -32,10 +33,11 @@ const App = () => {
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login setUser={setUser} />} />
         <Route path="/register" element={<Register setUser={setUser} />} />
+        <Route path="/verify-otp" element={<VerifyOtp setUser={setUser} />} />
 
         {/* <Route element={<ProtectedRoute />}> */}
           <Route element={<DashboardLayout user={user} />}>
-            <Route path="/dashboard" element={<Dashboard user={user} />} />
+            <Route path="/dashboard" element={<Dashboard user={user} setUser={setUser} />} />
             <Route path="/docs" element={<Docs />} />
           {/* </Route> */}
         </Route>

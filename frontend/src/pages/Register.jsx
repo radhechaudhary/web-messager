@@ -40,10 +40,11 @@ const Register = ({setUser}) => {
           name: form.name,
           password: form.password
         }, { withCredentials: true });
-        setUser({ email: form.email, name: form.name });
-        navigate("/dashboard");
+        navigate("/verify-otp", {
+          state: { email: form.email, name: form.name, password: form.password },
+        });
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
