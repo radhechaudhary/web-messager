@@ -10,7 +10,8 @@ const getDashboard = async (req, res)=>{
         // console.log("data", data.rows)
         res.status(200).json({
             success: true,
-            projects: data.rows
+            projects: data.rows,
+            user:req.user
         })
     } catch (error) {
         res.status(500).json({
