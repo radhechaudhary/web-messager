@@ -4,35 +4,11 @@ import dotenv from "dotenv";
 import jsonwebtoken from "jsonwebtoken";
 import db from "../db.js";
 import dns from "dns";
+import { Resend } from "resend";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    lookup: (hostname, options, callback) => {
-        dns.lookup(hostname, { family: 4 }, (err, address, family) => {
-            console.log("SMTP IPv4:", address, family);
-
-            if (err) {
-                return callback(err);
-            }
-
-            callback(null, address, family);
-        });
-    },
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS
-    }
-});
-await transporter.verify().then(() => {
-    console.log("SMTP server is ready to take messages");
-}).catch((err) => {
-    console.error("Error setting up SMTP server:", err);
-});
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 const router = Router();
 
 router.post("/send-message", async (req, res) => {
@@ -76,12 +52,12 @@ router.post("/send-message", async (req, res) => {
         const to = req.user.email; // Send email to the user's registered email
         // You can customize the email content here
         const text = `From: ${from}\n\nname: ${name || "Anonymous"}\n\n${message}`; 
-        await transporter.sendMail({
-            from: process.env.SMTP_USER,
-            to,
-            subject,
-            text
-        });
+        resend.emails.send({
+            from: process.env.RESEND_EMAIL_ID,
+            to: to,
+            subject: subject || "New Message",
+            text: text,
+        }); 
         res.status(200).json({ message: "Email sent successfully" });
     } catch (error) {
         console.error("Error sending email:", error);
