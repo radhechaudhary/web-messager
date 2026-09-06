@@ -23,7 +23,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static(
-    path.join(__dirname, "/dist")
+    path.join(__dirname, "/public")
 ));
 
 
@@ -40,7 +40,7 @@ app.use("/api", cors({origin: "*", credentials: false}), sendMailRouter);
 
 app.get("/{*splat}", (req, res) => {
     res.sendFile(
-        path.join(__dirname, "/dist/index.html")
+        path.join(__dirname, "/public/index.html")
     );
 });
 
