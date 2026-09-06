@@ -32,11 +32,11 @@ router.post("/send-message", async (req, res) => {
         const id = req.user.id;
         console.log(id);
         const dailyLimit = 100; // Set your daily limit here
-        const projectData = await db.query(`SELECT message_count, daily_message_count, last_reset, name FROM projects WHERE id = $1`, [id]);
+        const projectData = await db.query(`SELECT message_count, daily_message_count, last_reset, name as project_name FROM projects WHERE id = $1`, [id]);
         if(projectData.rowCount === 0){
             return res.status(404).json({ message: "Project not found" });
         }
-        var { message_count, daily_message_count, last_reset, name } = projectData.rows[0];
+        var { message_count, daily_message_count, last_reset, project_name } = projectData.rows[0];
         const today = new Date().toISOString().split('T')[0]; // Get current date in YYYY-MM-DD format
 
         if(last_reset !== today){
@@ -51,7 +51,7 @@ router.post("/send-message", async (req, res) => {
         await db.query(`UPDATE projects SET message_count = message_count + 1, daily_message_count = daily_message_count + 1 WHERE id = $1`, [id]);
         const to = req.user.email; // Send email to the user's registered email
         // You can customize the email content here
-        const text = `Project: ${name} \n\n From: ${from}\n\nname: ${name || "Anonymous"}\n\n${message}`; 
+        const text = `Project: ${project_name} \n\n From: ${from}\n\nname: ${name || "Anonymous"}\n\n${message}`; 
         resend.emails.send({
             from: process.env.RESEND_EMAIL_ID,
             to: to,
