@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import jsonwebtoken from "jsonwebtoken";
 import db from "../db.js";
+import dns from "dns";
 
 dotenv.config();
 
@@ -10,7 +11,17 @@ const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
-    family: 4,
+    lookup: (hostname, options, callback) => {
+        dns.lookup(hostname, { family: 4 }, (err, address, family) => {
+            console.log("SMTP IPv4:", address, family);
+
+            if (err) {
+                return callback(err);
+            }
+
+            callback(null, address, family);
+        });
+    },
     auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS
