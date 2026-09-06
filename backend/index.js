@@ -12,10 +12,6 @@ dotenv.config();
 
 
 const app = express();
-app.use(cors({
-  origin: "http://localhost:5173", // Replace with your frontend URL
-  credentials: true,
-}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -25,13 +21,13 @@ app.get("/", (req, res)=>{
     res.send("Email service is running");
 })
 import authRouter from "./routes/auth.route.js";
-app.use("/auth", authRouter);
+app.use("/auth", cors({origin: ["http://localhost:5173"], credentials: true}), authRouter);
 
 import dashboardRouter from "./routes/dashboard.route.js";
-app.use("/dashboard", dashboardRouter);
+app.use("/dashboard", cors({origin: ["http://localhost:5173"], credentials: true}), dashboardRouter);
 
 import sendMailRouter from "./routes/sendmail.route.js";
-app.use("/api", sendMailRouter);
+app.use("/api", cors({origin: "*", credentials: false}), sendMailRouter);
 
 const PORT = process.env.PORT || 3000;
 
