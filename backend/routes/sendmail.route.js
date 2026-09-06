@@ -49,6 +49,14 @@ router.post("/send-message", async (req, res) => {
             return res.status(429).json({ message: "Daily limit reached. You cannot send more emails today." });
         }
         await db.query(`UPDATE projects SET message_count = message_count + 1, daily_message_count = daily_message_count + 1 WHERE id = $1`, [id]);
+        try {
+            await db.query(
+                `INSERT INTO messages (project_id, sender_email, sender_name, subject, message) VALUES ($1, $2, $3, $4, $5)`,
+                [id, from, name || "Anonymous", subject || null, message]
+            );
+        } catch (logError) {
+            console.error("Error logging message:", logError);
+        }
         const to = req.user.email; // Send email to the user's registered email
         // You can customize the email content here
         const text = `Project: ${project_name} \n\n From: ${from}\n\nname: ${name || "Anonymous"}\n\n${message}`; 

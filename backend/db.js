@@ -43,6 +43,23 @@ export async function initDB() {
       );
     `);
 
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY,
+        project_id INT REFERENCES projects(id) ON DELETE CASCADE,
+        sender_email VARCHAR(255),
+        sender_name VARCHAR(255),
+        subject VARCHAR(255),
+        message TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+    `);
+
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_messages_project_created
+      ON messages (project_id, created_at DESC);
+    `);
+
     console.log("Database tables initialized");
   } catch (err) {
     console.error("Database initialization failed:", err);

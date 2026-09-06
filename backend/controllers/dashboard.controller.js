@@ -66,4 +66,50 @@ const deleteProject = async (req, res)=>{
 }
 
 
-export {getDashboard, createProject, deleteProject}
+const getProjectAnalytics = async (req, res)=>{
+    try {
+        const { id } = req.params;
+        const email = req.user.email;
+        const projectData = await db.query(
+            `SELECT id, name, message_count, daily_message_count, daily_limit, last_reset FROM projects WHERE id = $1 AND user_email = $2`,
+            [id, email]
+        );
+        if (projectData.rowCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "Project not found or you do not have permission to view it."
+            })
+        }
+        const project = projectData.rows[0];
+        const today = new Date().toISOString().split("T")[0];
+        const lastReset = project.last_reset ? new Date(project.last_reset).toISOString().split("T")[0] : null;
+        const dailyMessageCount = lastReset === today ? project.daily_message_count : 0;
+        const dailyLimit = project.daily_limit ?? 100;
+        const remainingToday = Math.max(dailyLimit - dailyMessageCount, 0);
+
+        const recentMessages = await db.query(
+            `SELECT id, sender_email, sender_name, subject, message, created_at
+             FROM messages WHERE project_id = $1 ORDER BY created_at DESC LIMIT 5`,
+            [id]
+        );
+
+        res.status(200).json({
+            success: true,
+            analytics: {
+                totalMessages: project.message_count,
+                dailyMessageCount,
+                dailyLimit,
+                remainingToday,
+                recentMessages: recentMessages.rows
+            }
+        })
+    } catch (error) {
+        console.error("Error fetching project analytics:", error);
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while fetching analytics."
+        })
+    }
+}
+
+export {getDashboard, createProject, deleteProject, getProjectAnalytics}

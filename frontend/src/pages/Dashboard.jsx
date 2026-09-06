@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 import {useNavigate} from "react-router-dom";
+import AnalyticsPanel from "../components/AnalyticsPanel";
 
 const Dashboard = ({user}) => {
   // const { token } = useAuth();
@@ -11,6 +12,10 @@ const Dashboard = ({user}) => {
   const [form, setForm] = useState({ name: "", domain: "" });
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
+  const [openAnalyticsId, setOpenAnalyticsId] = useState(null);
+  const [analytics, setAnalytics] = useState({});
+  const [analyticsLoading, setAnalyticsLoading] = useState(null);
+  const [analyticsError, setAnalyticsError] = useState({});
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -64,6 +69,29 @@ const Dashboard = ({user}) => {
       await axios.delete(`${import.meta.env.VITE_BACKEND_URL}/dashboard/deleteProject/${id}`, { withCredentials: true }); 
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleToggleAnalytics = async (id) => {
+    if (openAnalyticsId === id) {
+      setOpenAnalyticsId(null);
+      return;
+    }
+    setOpenAnalyticsId(id);
+    if (analytics[id]) return; // already fetched
+
+    setAnalyticsLoading(id);
+    setAnalyticsError((prev) => ({ ...prev, [id]: "" }));
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BACKEND_URL}/dashboard/projects/${id}/analytics`,
+        { withCredentials: true }
+      );
+      setAnalytics((prev) => ({ ...prev, [id]: response.data.analytics }));
+    } catch {
+      setAnalyticsError((prev) => ({ ...prev, [id]: "Failed to load analytics." }));
+    } finally {
+      setAnalyticsLoading(null);
     }
   };
 
@@ -150,7 +178,8 @@ const Dashboard = ({user}) => {
               </thead>
               <tbody>
                 {projects.map((project) => (
-                  <tr key={project.apiKey} className="border-b border-slate-100 last:border-0">
+                  <Fragment key={project.apiKey}>
+                  <tr className="border-b border-slate-100 last:border-0">
                     <td className="px-6 py-3 font-medium text-slate-800">{project.name}</td>
                     <td className="px-6 py-3 text-slate-600">{project.domain}</td>
                     <td className="px-6 py-3">
@@ -167,7 +196,20 @@ const Dashboard = ({user}) => {
                       </div>
                     </td>
                     <td className="px-6 py-3 text-slate-600">{project.message_count}</td>
-                    <td className="px-6 py-3 text-right">
+                    <td className="px-6 py-3 text-right whitespace-nowrap">
+                      <button
+                        onClick={() => handleToggleAnalytics(project.id)}
+                        className="text-xs font-medium text-indigo-600 hover:underline mr-4 inline-flex items-center gap-1"
+                      >
+                        Analytics
+                        <span
+                          className={`inline-block transition-transform ${
+                            openAnalyticsId === project.id ? "rotate-180" : ""
+                          }`}
+                        >
+                          ▾
+                        </span>
+                      </button>
                       <button
                         onClick={() => handleDelete(project.id)}
                         className="text-xs font-medium text-red-600 hover:underline"
@@ -176,6 +218,18 @@ const Dashboard = ({user}) => {
                       </button>
                     </td>
                   </tr>
+                  {openAnalyticsId === project.id && (
+                    <tr className="border-b border-slate-100 last:border-0 bg-slate-50">
+                      <td colSpan={5} className="px-6 py-4">
+                        <AnalyticsPanel
+                          loading={analyticsLoading === project.id}
+                          error={analyticsError[project.id]}
+                          analytics={analytics[project.id]}
+                        />
+                      </td>
+                    </tr>
+                  )}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
