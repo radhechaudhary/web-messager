@@ -6,6 +6,11 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -14,20 +19,27 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static(
+    path.join(__dirname, "/public")
+));
 
 
 
-app.get("/", (req, res)=>{
-    res.send("Email service is running");
-})
+
 import authRouter from "./routes/auth.route.js";
-app.use("/auth", cors({origin: ["http://localhost:5173"], credentials: true}), authRouter);
+app.use("/auth", cors({origin: [process.env.FRONTEND_URL], credentials: true}), authRouter);
 
 import dashboardRouter from "./routes/dashboard.route.js";
-app.use("/dashboard", cors({origin: ["http://localhost:5173"], credentials: true}), dashboardRouter);
+app.use("/dashboard", cors({origin: [process.env.FRONTEND_URL], credentials: true}), dashboardRouter);
 
 import sendMailRouter from "./routes/sendmail.route.js";
 app.use("/api", cors({origin: "*", credentials: false}), sendMailRouter);
+
+app.get("/{*splat}", (req, res) => {
+    res.sendFile(
+        path.join(__dirname, "/public/index.html")
+    );
+});
 
 const PORT = process.env.PORT || 3000;
 

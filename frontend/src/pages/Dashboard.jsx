@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import {useNavigate} from "react-router-dom";
 
 const Dashboard = ({user}) => {
   // const { token } = useAuth();
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,7 +21,7 @@ const Dashboard = ({user}) => {
         const projects = response.data.projects;
         setProjects(projects);
       } catch (err) {
-        
+        navigate("/login", { replace: true });
         setError(err.message);
       } finally {
         setLoading(false);

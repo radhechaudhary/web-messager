@@ -31,7 +31,10 @@ pool.query(`CREATE TABLE IF NOT EXISTS projects (
     domain VARCHAR(255) NOT NULL,
     api_key VARCHAR(255) NOT NULL,
     message_count INT DEFAULT 0,
-    user_email VARCHAR(255) REFERENCES users(email)
+    user_email VARCHAR(255) REFERENCES users(email),
+    daily_limit INT DEFAULT 100,
+    daily_message_count INT DEFAULT 0,
+    last_reset DATE DEFAULT CURRENT_DATE
 );`)
 
 // pool.query(`ALTER TABLE projects

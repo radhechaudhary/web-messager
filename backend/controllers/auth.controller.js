@@ -32,7 +32,7 @@ const login = async (req, res)=>{
         return res.status(401).json({message: "Invalid credentials"});
     }
     const token = jsonwebtoken.sign({email: user.rows[0].email, name: user.rows[0].name}, JWT_SECRET, {expiresIn: "1h"});
-    res.cookie("token", token, {httpOnly: true, maxAge: 3600000, sameSite: false});
+    res.cookie("token", token, {httpOnly: true, maxAge: 3600000, sameSite: true});
     res.status(200).json({message: "Login successful", name: user.rows[0].name});
 }    
 
@@ -42,7 +42,7 @@ const register = async (req, res)=>{
     const hashedPassword = await bcrypt.hash(password, 10);
     try {
         await db.query("INSERT INTO users (email, name, password) VALUES ($1, $2, $3)", [email, name, hashedPassword]);
-        res.cookie("token", jsonwebtoken.sign({email, name}, JWT_SECRET, {expiresIn: "1h"}), {httpOnly: true, maxAge: 3600000, sameSite: false});
+        res.cookie("token", jsonwebtoken.sign({email, name}, JWT_SECRET, {expiresIn: "1h"}), {httpOnly: true, maxAge: 3600000, sameSite: true});
         res.status(201).json({message: "User registered successfully"});
     } catch (error) {
         if (error.code === "23505") { // unique_violation

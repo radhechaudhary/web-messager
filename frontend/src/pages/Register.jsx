@@ -12,7 +12,7 @@ const Register = ({setUser}) => {
       axios.get(`${import.meta.env.VITE_BACKEND_URL}/auth/verify`, { withCredentials: true })
       .then((response) => {
         setUser(response.data.user);
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       })
       .catch((error) => {
         console.error("Error fetching user:", error);
@@ -52,6 +52,13 @@ const Register = ({setUser}) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4">
       <div className="w-full max-w-sm bg-white rounded-xl shadow-md p-8">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 mb-6 transition-colors"
+        >
+          <span aria-hidden="true">&larr;</span> Back to home
+        </Link>
+
         <h1 className="text-2xl font-semibold text-slate-800 mb-1">Create an account</h1>
         <p className="text-sm text-slate-500 mb-6">Sign up to get started</p>
 

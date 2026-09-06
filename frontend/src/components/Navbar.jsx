@@ -34,7 +34,7 @@ const Navbar = ({user}) => {
           {user && <span className="text-sm text-slate-500">{user.name}</span>}
           <button
             onClick={handleLogout}
-            className="text-sm font-medium text-slate-600 hover:text-red-600 transition-colors"
+            className="text-sm font-medium text-slate-600 border border-slate-300 rounded-md px-3 py-1.5 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors"
           >
             Log out
           </button>

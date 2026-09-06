@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const BASE_URL = "https://web-messager.mohitch.me";
 
 const SNIPPETS = {
   javascript: `await fetch("${BASE_URL}/api/send-message", {
@@ -123,7 +123,7 @@ const Landing = () => {
             </a>
             <Link
               to="/login"
-              className="text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-2 rounded-md transition-colors"
+              className="text-sm font-medium text-slate-700 border border-slate-300 px-3.5 py-2 rounded-md hover:bg-slate-50 hover:text-slate-900 transition-colors"
             >
               Log in
             </Link>

@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const BASE_URL = "https://web-messager.mohitch.me";
 
 const CodeBlock = ({ children }) => (
   <pre className="bg-slate-900 text-slate-100 text-xs rounded-lg p-4 overflow-x-auto">
