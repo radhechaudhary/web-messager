@@ -1,6 +1,7 @@
-import {Pool} from "pg"
-import dotenv from "dotenv"
-dotenv.config()
+import { Pool } from "pg";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const pool = new Pool({
   user: process.env.POSTGRES_USER,
@@ -8,37 +9,45 @@ const pool = new Pool({
   database: process.env.POSTGRES_DB,
   host: process.env.POSTGRES_HOST,
   port: process.env.POSTGRES_PORT,
-})
+});
 
 pool.on("connect", () => {
   console.log("Connected to the database");
-})
+});
 
 pool.on("error", (err) => {
   console.error("Unexpected error on idle client", err);
-  process.exit(-1);
-})
+});
 
-pool.query(`CREATE TABLE IF NOT EXISTS users (
-    email VARCHAR(255) primary key UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL
-);`)
+export async function initDB() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        email VARCHAR(255) PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        password VARCHAR(255) NOT NULL
+      );
+    `);
 
-pool.query(`CREATE TABLE IF NOT EXISTS projects (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    domain VARCHAR(255) NOT NULL,
-    api_key VARCHAR(255) NOT NULL,
-    message_count INT DEFAULT 0,
-    user_email VARCHAR(255) REFERENCES users(email),
-    daily_limit INT DEFAULT 100,
-    daily_message_count INT DEFAULT 0,
-    last_reset DATE DEFAULT CURRENT_DATE
-);`)
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS projects (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        domain VARCHAR(255) NOT NULL,
+        api_key VARCHAR(255) NOT NULL,
+        message_count INT DEFAULT 0,
+        user_email VARCHAR(255) REFERENCES users(email),
+        daily_limit INT DEFAULT 100,
+        daily_message_count INT DEFAULT 0,
+        last_reset DATE DEFAULT CURRENT_DATE
+      );
+    `);
 
-// pool.query(`ALTER TABLE projects
-// ADD COLUMN daily_limit INT DEFAULT 100,
-// ADD COLUMN daily_message_count INT DEFAULT 0,
-// ADD COLUMN last_reset DATE DEFAULT CURRENT_DATE;`)
-export default pool
+    console.log("Database tables initialized");
+  } catch (err) {
+    console.error("Database initialization failed:", err);
+    throw err;
+  }
+}
+
+export default pool;
